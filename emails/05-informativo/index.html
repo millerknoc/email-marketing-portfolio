@@ -1,0 +1,203 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="pt-BR">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="x-apple-disable-message-reformatting" />
+  <title>Analytics Digest #14: Modelagem Star Schema e Dicas DAX</title>
+  <style type="text/css">
+    /* Resets universais */
+    body, table, td, a { -webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%; }
+    table, td { mso-table-lspace: 0pt; mso-table-rspace: 0pt; }
+    img { -ms-interpolation-mode: bicubic; border: 0; outline: none; text-decoration: none; }
+    body { margin: 0; padding: 0; width: 100% !important; min-width: 100%; }
+
+    /* Responsividade */
+    @media only screen and (max-width: 600px) {
+      .email-container { width: 100% !important; max-width: 100% !important; }
+      .fluid-padding { padding-left: 20px !important; padding-right: 20px !important; }
+      .headline { font-size: 22px !important; line-height: 28px !important; }
+      .header-col { display: block !important; width: 100% !important; text-align: left !important; }
+      .badge-container { padding-top: 8px !important; }
+      .two-col-item { width: 100% !important; max-width: 100% !important; display: block !important; }
+      .two-col-spacer { display: none !important; }
+      .two-col-bottom-gap { margin-bottom: 20px !important; }
+      .feedback-table { width: 100% !important; }
+      .feedback-col { display: block !important; width: 100% !important; padding: 4px 0 !important; }
+      .feedback-btn { display: block !important; width: 100% !important; box-sizing: border-box !important; text-align: center !important; padding: 10px !important; }
+    }
+  </style>
+</head>
+<body style="margin: 0; padding: 0; background-color: #f1f5f9; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;">
+
+  <!-- Preheader -->
+  <div style="display: none; font-size: 1px; color: #f1f5f9; line-height: 1px; max-height: 0px; max-width: 0px; opacity: 0; overflow: hidden;">
+    Edição #14: Por que tabelas Star Schema evitam lentidão no Power BI + 2 dicas de performance em DAX. &zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;
+  </div>
+
+  <!-- Container externo -->
+  <table border="0" cellpadding="0" cellspacing="0" width="100%" style="background-color: #f1f5f9;">
+    <tr>
+      <td align="center" style="padding: 30px 15px 40px 15px;">
+        
+        <!-- CARD PRINCIPAL -->
+        <table border="0" cellpadding="0" cellspacing="0" width="600" class="email-container" style="max-width: 600px; width: 100%; background-color: #ffffff; border-radius: 12px; overflow: hidden; border: 1px solid #e2e8f0; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);">
+          
+          <!-- NAVBAR / HEADER -->
+          <tr>
+            <td align="left" style="background-color: #060911; padding: 24px 36px; border-bottom: 2px solid #06b6d4;" class="fluid-padding">
+              <table border="0" cellpadding="0" cellspacing="0" width="100%">
+                <tr>
+                  <td class="header-col">
+                    <span style="font-size: 18px; font-weight: 700; color: #ffffff; letter-spacing: -0.02em;">
+                      Miller Santana <span style="color: #06b6d4;">Analytics</span>
+                    </span>
+                  </td>
+                  <td align="right" class="header-col badge-container">
+                    <span style="font-size: 11px; font-weight: 700; color: #38bdf8; text-transform: uppercase; letter-spacing: 0.05em; background: #0c203a; padding: 4px 10px; border-radius: 9999px; border: 1px solid rgba(56,189,248,0.3); white-space: nowrap; display: inline-block;">
+                      Newsletter Quinzenal • #14
+                    </span>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+
+          <!-- Título da edição -->
+          <tr>
+            <td align="left" style="padding: 36px 36px 20px 36px;" class="fluid-padding">
+              <span style="display: inline-block; font-size: 12px; font-weight: 700; color: #2563eb; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 8px;">
+                INSIGHTS DE ENGENHARIA ANALÍTICA
+              </span>
+              <h1 class="headline" style="margin: 0 0 16px 0; font-size: 24px; line-height: 30px; font-weight: 800; color: #0f172a; letter-spacing: -0.02em;">
+                O erro invisível que deixa seus dashboards no Power BI 5x mais lentos
+              </h1>
+              <p style="margin: 0 0 16px 0; font-size: 15px; line-height: 24px; color: #475569;">
+                Olá, <strong>{{nome}}</strong>! Conforme sua base de dados cresce, relatórios que antes abriam instantaneamente começam a travar em filtros simples. Na maioria das vezes, o problema não está no volume de linhas, mas na modelagem de relacionamentos.
+              </p>
+            </td>
+          </tr>
+
+          <!-- Artigo principal -->
+          <tr>
+            <td style="padding: 0 36px 28px 36px;" class="fluid-padding">
+              <table border="0" cellpadding="0" cellspacing="0" width="100%" style="background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 22px;">
+                <tr>
+                  <td>
+                    <span style="font-size: 11px; font-weight: 700; color: #0284c7; text-transform: uppercase; letter-spacing: 0.05em; display: block; margin-bottom: 6px;">
+                      Destaque da Quinzena
+                    </span>
+                    <h2 style="margin: 0 0 10px 0; font-size: 18px; font-weight: 700; color: #0f172a;">
+                      Relacionamento Bidirecional vs. Star Schema
+                    </h2>
+                    <p style="margin: 0 0 14px 0; font-size: 14px; line-height: 22px; color: #475569;">
+                      Ativar a filtragem cruzada em ambas as direções parece a solução mais rápida para filtros que não funcionam. No entanto, isso força a engine do VertiPaq a percorrer caminhos ambíguos na memória.
+                    </p>
+                    <a href="https://millerknoc.github.io/lp-dashboard-powerbi/?utm_source=newsletter&utm_medium=email&utm_campaign=digest_14_artigo" target="_blank" style="font-size: 13px; font-weight: 700; color: #2563eb; text-decoration: none;">
+                      Ler artigo completo no blog &rarr;
+                    </a>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+
+          <!-- Divisória da seção -->
+          <tr>
+            <td style="padding: 0 36px 16px 36px;" class="fluid-padding">
+              <h3 style="margin: 0; font-size: 14px; font-weight: 700; color: #0f172a; text-transform: uppercase; letter-spacing: 0.05em; border-bottom: 2px solid #f1f5f9; padding-bottom: 8px;">
+                💡 Dicas Rápidas de Aplicação
+              </h3>
+            </td>
+          </tr>
+
+          <!-- Seção duas colunas com responsividade -->
+<tr>
+  <td style="padding: 0 36px 32px 36px;" class="fluid-padding">
+    <table border="0" cellpadding="0" cellspacing="0" width="100%">
+      <tr>
+        <td valign="top">
+          
+          <!-- CARTÃO 1 (Esquerda no Desk / 100% no Mobile) -->
+          <table border="0" cellpadding="0" cellspacing="0" width="250" align="left" class="two-col-item two-col-bottom-gap">
+            <tr>
+              <td style="background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 8px; padding: 18px;">
+                <span style="font-size: 20px; display: block; margin-bottom: 8px;">⚡</span>
+                <h4 style="margin: 0 0 6px 0; font-size: 14px; font-weight: 700; color: #0f172a;">Prefira DIVIDE() em vez de /</h4>
+                <p style="margin: 0; font-size: 13px; line-height: 20px; color: #64748b;">A função <code>DIVIDE()</code> trata nativamente divisões por zero e economiza o uso de cláusulas <code>IF()</code> desnecessárias no DAX.</p>
+              </td>
+            </tr>
+          </table>
+
+          <!-- ESPAÇADOR DESKTOP (Some no Mobile) -->
+          <table border="0" cellpadding="0" cellspacing="0" width="20" align="left" class="two-col-spacer">
+            <tr>
+              <td width="20" height="10" style="font-size: 1px; line-height: 1px;">&nbsp;</td>
+            </tr>
+          </table>
+
+          <!-- CARTÃO 2 (Direita no Desk / 100% no Mobile) -->
+          <table border="0" cellpadding="0" cellspacing="0" width="250" align="left" class="two-col-item">
+            <tr>
+              <td style="background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 8px; padding: 18px;">
+                <span style="font-size: 20px; display: block; margin-bottom: 8px;">🎯</span>
+                <h4 style="margin: 0 0 6px 0; font-size: 14px; font-weight: 700; color: #0f172a;">Evite Cardinalidade N:N</h4>
+                <p style="margin: 0; font-size: 13px; line-height: 20px; color: #64748b;">Crie uma tabela ponte (Bridge table) com valores únicos sempre que precisar relacionar duas tabelas que não possuem chave primária pura.</p>
+              </td>
+            </tr>
+          </table>
+
+        </td>
+      </tr>
+    </table>
+  </td>
+</tr>
+          <!-- FEEDBACK / INTERAÇÃO RÁPIDA -->
+          <!-- FEEDBACK / INTERAÇÃO RÁPIDA -->
+<tr>
+  <td align="center" style="background-color: #060911; padding: 24px 36px;" class="fluid-padding">
+    <span style="font-size: 13px; font-weight: 600; color: #ffffff; display: block; margin-bottom: 12px;">
+      O que você achou desta edição?
+    </span>
+    <table border="0" cellpadding="0" cellspacing="0" class="feedback-table">
+      <tr>
+        <td class="feedback-col" style="padding: 0 4px;">
+          <a href="#" class="feedback-btn" style="font-size: 12px; color: #94a3b8; text-decoration: none; padding: 8px 12px; background-color: #0d1322; border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; display: inline-block; white-space: nowrap; line-height: 16px;">🔥 Muito útil</a>
+        </td>
+        <td class="feedback-col" style="padding: 0 4px;">
+          <a href="#" class="feedback-btn" style="font-size: 12px; color: #94a3b8; text-decoration: none; padding: 8px 12px; background-color: #0d1322; border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; display: inline-block; white-space: nowrap; line-height: 16px;">👍 Razoável</a>
+        </td>
+        <td class="feedback-col" style="padding: 0 4px;">
+          <a href="#" class="feedback-btn" style="font-size: 12px; color: #94a3b8; text-decoration: none; padding: 8px 12px; background-color: #0d1322; border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; display: inline-block; white-space: nowrap; line-height: 16px;">👎 Pouco relevante</a>
+        </td>
+      </tr>
+    </table>
+  </td>
+</tr>
+
+        </table>
+
+        <!-- Footer -->
+        <table border="0" cellpadding="0" cellspacing="0" width="600" class="email-container" style="max-width: 600px; width: 100%; margin-top: 24px;">
+          <tr>
+            <td align="center" style="font-size: 12px; line-height: 18px; color: #64748b; padding: 0 20px;">
+              <p style="margin: 0 0 8px 0;">
+                Você recebe a <strong>Analytics Digest</strong> quinzenalmente por ser cadastrado na base de dados da <strong>Miller Santana Analytics</strong>.
+              </p>
+              <p style="margin: 0 0 8px 0;">
+                Av. Beltrano, 1000 - Recife/PE, Brasil
+              </p>
+              <p style="margin: 0;">
+                <a href="#" style="color: #64748b; text-decoration: underline;">Alterar frequência</a> &nbsp;|&nbsp; 
+                <a href="#" style="color: #64748b; text-decoration: underline;">Descadastrar da newsletter</a>
+              </p>
+            </td>
+          </tr>
+        </table>
+
+      </td>
+    </tr>
+  </table>
+
+</body>
+</html>
